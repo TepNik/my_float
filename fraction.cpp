@@ -1,36 +1,19 @@
-#pragma once
-#include "myfloat.h"
+#ifndef _MY_FLOAT_CPP_
+#define _MY_FLOAT_CPP_
+#include "fraction.h"
 #include <cmath>
 
-myfloat::myfloat() {}
+namespace tnik
+{
 
-myfloat::myfloat(long long x, long long y)
+fraction::fraction() {}
+
+fraction::fraction(long long x, long long y)
             : top(std::abs(x) / gcd(std::abs(x), std::abs(y)))
             , bot(std::abs(y) / gcd(std::abs(x), std::abs(y)))
             , sign(what_sign(x, y)){}
 
-myfloat::myfloat(long double input)
-{
-    unsigned long long flag = 1ULL << 63;
-    if (input < 0)
-        sign = true;
-    else
-        sign = false;
-    unsigned long long down = 1ULL;
-    input = std::abs(input);
-    while ((long long) input != input)
-    {
-        input *= 10;
-        down *= 10;
-    }
-    top = input;
-    bot = down;
-    long long gcd_for_float = gcd(top, bot);
-    top /= gcd_for_float;
-    bot /= gcd_for_float;
-}
-
-myfloat::myfloat(const myfloat &temp)
+fraction::fraction(const fraction &temp)
 {
     top = temp.top;
     bot = temp.bot;
@@ -39,7 +22,7 @@ myfloat::myfloat(const myfloat &temp)
 
 ///////////////////////////////////////////
 
-std::ostream &operator<<(std::ostream &stream, const myfloat& obj)
+std::ostream &operator<<(std::ostream &stream, const fraction& obj)
 {
     if (obj.top == 0)
     {
@@ -57,7 +40,7 @@ std::ostream &operator<<(std::ostream &stream, const myfloat& obj)
     return stream;
 }
 
-std::istream &operator>>(std::istream& stream, myfloat &obj)
+std::istream &operator>>(std::istream& stream, fraction &obj)
 {
     long long x, y;
     stream >> x >> y;
@@ -69,17 +52,17 @@ std::istream &operator>>(std::istream& stream, myfloat &obj)
 
 ///////////////////////////////////////////
 
-void myfloat::operator=(const myfloat& temp)
+void fraction::operator=(const fraction& temp)
 {
     top = temp.top;
     bot = temp.bot;
     sign = temp.sign;
 }
 
-myfloat myfloat::operator+(const myfloat& s) const
+fraction fraction::operator+(const fraction& s) const
 {
-    myfloat temp(*this);
-    myfloat sec = s;
+    fraction temp(*this);
+    fraction sec = s;
     if (temp.bot % sec.bot == 0)
     {
         unsigned long long x = temp.bot / sec.bot;
@@ -115,19 +98,19 @@ myfloat myfloat::operator+(const myfloat& s) const
     return temp;
 }
 
-myfloat myfloat::operator-(const myfloat& s) const
+fraction fraction::operator-(const fraction& s) const
 {
-    myfloat sec = s;
+    fraction sec = s;
     sec.sign ^= 1;
     return *this + sec;
 }
 
-myfloat myfloat::operator*(const myfloat& s) const
+fraction fraction::operator*(const fraction& s) const
 {
-    myfloat sec = s;
-    myfloat temp(*this);
+    fraction sec = s;
+    fraction temp(*this);
     if ((temp.top == 0) || (sec.top == 0))
-        return myfloat(0, 1);
+        return fraction(0, 1);
     unsigned long long gcd1 = gcd(temp.top, sec.bot);
     unsigned long long gcd2 = gcd(temp.bot, sec.top);
     temp.top /= gcd1;
@@ -140,9 +123,9 @@ myfloat myfloat::operator*(const myfloat& s) const
     return temp;
 }
 
-myfloat myfloat::operator/(const myfloat& s) const
+fraction fraction::operator/(const fraction& s) const
 {
-    myfloat sec = s;
+    fraction sec = s;
     sec.top ^= sec.bot;
     sec.bot ^= sec.top;
     sec.top ^= sec.bot;
@@ -151,9 +134,9 @@ myfloat myfloat::operator/(const myfloat& s) const
 
 ///////////////////////////////////////////
 
-myfloat myfloat::operator++(int)
+fraction fraction::operator++(int)
 {
-    myfloat obj2(*this);
+    fraction obj2(*this);
     if (sign == false)
         top += bot;
     else if (top >= bot)
@@ -166,7 +149,7 @@ myfloat myfloat::operator++(int)
     return obj2;
 }
 
-myfloat& operator++(myfloat &obj)
+fraction& operator++(fraction &obj)
 {
     if (obj.sign == false)
         obj.top += obj.bot;
@@ -182,9 +165,9 @@ myfloat& operator++(myfloat &obj)
 
 ///////////////////////////////////////////
 
-myfloat myfloat::operator--(int)
+fraction fraction::operator--(int)
 {
-    myfloat obj2(*this);
+    fraction obj2(*this);
     if (sign == true)
         top += bot;
     else if (top >= bot)
@@ -197,7 +180,7 @@ myfloat myfloat::operator--(int)
     return obj2;
 }
 
-myfloat& operator--(myfloat &obj)
+fraction& operator--(fraction &obj)
 {
     if (obj.sign == true)
         obj.top += obj.bot;
@@ -213,91 +196,33 @@ myfloat& operator--(myfloat &obj)
 
 ///////////////////////////////////////////
 
-myfloat& myfloat::operator+=(long double x)
-{
-    myfloat temp(x);
-    *this += temp;
-    return *this;
-}
-
-myfloat& myfloat::operator+=(const myfloat& obj)
+fraction& fraction::operator+=(const fraction& obj)
 {
     *this = *this + obj;
     return *this;
 }
 
-long double& operator+=(long double &x, const myfloat& obj)
-{
-    x += (long double)obj;
-    return x;
-}
-
-///////////////////////////////////////////
-
-myfloat& myfloat::operator-=(long double x)
-{
-    myfloat temp(x);
-    *this -= temp;
-    return *this;
-}
-
-myfloat& myfloat::operator-=(const myfloat& obj)
+fraction& fraction::operator-=(const fraction& obj)
 {
     *this = *this - obj;
     return *this;
 }
 
-long double& operator-=(long double &x, const myfloat& obj)
-{
-    x -= (long double)obj;
-    return x;
-}
-
-///////////////////////////////////////////
-
-myfloat& myfloat::operator*=(long double x)
-{
-    myfloat temp(x);
-    *this *= temp;
-    return *this;
-}
-
-myfloat& myfloat::operator*=(const myfloat& obj)
+fraction& fraction::operator*=(const fraction& obj)
 {
     *this = *this * obj;
     return *this;
 }
 
-long double& operator*=(long double &x, const myfloat& obj)
-{
-    x *= (long double)obj;
-    return x;
-}
-
-///////////////////////////////////////////
-
-myfloat& myfloat::operator/=(long double x)
-{
-    myfloat temp(x);
-    *this /= temp;
-    return *this;
-}
-
-myfloat& myfloat::operator/=(const myfloat& obj)
+fraction& fraction::operator/=(const fraction& obj)
 {
     *this = *this / obj;
     return *this;
 }
 
-long double& operator/=(long double &x, const myfloat& obj)
-{
-    x /= (long double)obj;
-    return x;
-}
-
 ///////////////////////////////////////////
 
-void myfloat::swap(myfloat &sec)
+void fraction::swap(fraction &sec)
 {
     sec.top ^= this->top;
     this->top ^= sec.top;
@@ -314,17 +239,58 @@ void myfloat::swap(myfloat &sec)
 
 ///////////////////////////////////////////
 
-myfloat::operator long double() const
+fraction::operator long double() const
 {
     if (sign)
         return -1.0L * ((long double) top) / ((long double)bot);
     return ((long double) top) / ((long double)bot);
 }
 
-/*myfloat::operator int()
+///////////////////////////////////////////
+
+bool fraction::operator==(const fraction& sec) const
 {
-    return this->top / this->bot;
-}*/
+	if (this->sign == sec.sign && this->top == sec.top && this->bot == sec.bot)
+		return true;
+	else
+		return false;
+}
+
+bool fraction::operator<(const fraction& sec) const
+{
+	if (this->sign != 0 ^ sec.sign != 0)
+	{
+		return this->sign > sec.sign;
+	}
+	else
+	{
+		unsigned long long left = this->top/gcd(this->top, sec.top);
+		left *= sec.bot/gcd(this->bot, sec.bot);
+
+		unsigned long long right = this->bot/gcd(this->bot, sec.bot);
+		left *= sec.top/gcd(this->top, sec.top);
+
+		if (this->sign)
+			return left > right;
+		else
+			return left < right;
+	}
+}
+
+bool fraction::operator<=(const fraction& sec) const
+{
+	return (*this < sec) || (*this == sec);
+}
+
+bool fraction::operator>(const fraction& sec) const
+{
+	return sec < *this;
+}
+
+bool fraction::operator>=(const fraction& sec) const
+{
+	return sec <= *this;
+}
 
 ///////////////////////////////////////////
 
@@ -390,3 +356,5 @@ unsigned long long pow(unsigned long long x, unsigned long long y)
         res *= x;
     return res;
 }
+}
+#endif
