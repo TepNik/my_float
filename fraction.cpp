@@ -9,9 +9,14 @@ namespace tnik
 fraction::fraction() {}
 
 fraction::fraction(long long x, long long y)
-            : top(std::abs(x) / gcd(std::abs(x), std::abs(y)))
-            , bot(std::abs(y) / gcd(std::abs(x), std::abs(y)))
-            , sign(what_sign(x, y)){}
+            : sign(what_sign(x, y))
+{
+    x = std::abs(x);
+    y = std::abs(y);
+    long long gcd_xy = gcd(x, y);
+    top = x / gcd_xy;
+    bot = y / gcd_xy;
+}
 
 fraction::fraction(const fraction &temp)
 {

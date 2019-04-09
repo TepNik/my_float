@@ -1,2 +1,5 @@
 .vscode
 main.cpp
+*.txt
+*.o
+*.exe
